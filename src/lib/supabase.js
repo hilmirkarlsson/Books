@@ -5,6 +5,9 @@ export const supabase = createClient(
   import.meta.env.VITE_SUPABASE_ANON_KEY ?? "sb_publishable_1e96yGLr_oSVnDbVxAOjKQ_A3L8wOzX"
 );
 
+// Single fixed key for this deployment — no user setup needed.
+export const HOUSEHOLD_KEY = "f5474ace-5727-48ca-b48a-8001966463a8";
+
 // ── Field mapping (app camelCase ↔ DB snake_case) ────────────────────────────
 
 function bookToRow(book, profileId, householdKey) {

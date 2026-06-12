@@ -10,6 +10,7 @@ import {
 
 import { libraryKeyFor } from "./profiles.js";
 import {
+  HOUSEHOLD_KEY,
   fetchLibrary,
   patchBook,
   removeBookFromDB,
@@ -100,14 +101,10 @@ function reducer(state, action) {
 
 const LibraryContext = createContext(null);
 
-export function LibraryProvider({ profileId, householdKey, onError, children }) {
-  // Boot from localStorage cache immediately so UI is never blank.
+export function LibraryProvider({ profileId, onError, children }) {
   const [state, dispatch] = useReducer(reducer, profileId, loadFromCache);
-
-  // Prevent a late-arriving hydration from overwriting user changes.
   const userEdited = useRef(false);
 
-  // Stable error reporter that always calls the latest onError prop.
   const onErrorRef = useRef(onError);
   useEffect(() => { onErrorRef.current = onError; }, [onError]);
   const report = useCallback(
@@ -115,18 +112,14 @@ export function LibraryProvider({ profileId, householdKey, onError, children }) 
     []
   );
 
-  // Hydrate from Supabase once on mount.
   useEffect(() => {
-    fetchLibrary(profileId, householdKey)
+    fetchLibrary(profileId, HOUSEHOLD_KEY)
       .then((remote) => {
-        if (!userEdited.current) {
-          dispatch({ type: "hydrate", state: remote });
-        }
+        if (!userEdited.current) dispatch({ type: "hydrate", state: remote });
       })
       .catch(report);
-  }, [profileId, householdKey, report]);
+  }, [profileId, report]);
 
-  // Write-through to localStorage so the next cold load is instant.
   useEffect(() => {
     localStorage.setItem(libraryKeyFor(profileId), JSON.stringify(state));
   }, [state, profileId]);
@@ -139,7 +132,7 @@ export function LibraryProvider({ profileId, householdKey, onError, children }) 
       addBook(book) {
         userEdited.current = true;
         dispatch({ type: "add", book });
-        upsertBook(book, profileId, householdKey).catch(report);
+        upsertBook(book, profileId, HOUSEHOLD_KEY).catch(report);
       },
 
       updateBook(id, patch) {
@@ -168,7 +161,7 @@ export function LibraryProvider({ profileId, householdKey, onError, children }) 
       },
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [state, profileId, householdKey]
+    [state, profileId]
   );
 
   return (
