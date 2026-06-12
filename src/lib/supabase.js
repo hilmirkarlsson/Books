@@ -1,8 +1,8 @@
 import { createClient } from "@supabase/supabase-js";
 
 export const supabase = createClient(
-  import.meta.env.VITE_SUPABASE_URL ?? "https://mlgehuccskeycoexedsc.supabase.co",
-  import.meta.env.VITE_SUPABASE_ANON_KEY ?? "sb_publishable_1e96yGLr_oSVnDbVxAOjKQ_A3L8wOzX"
+  import.meta.env.VITE_SUPABASE_URL || "https://mlgehuccskeycoexedsc.supabase.co",
+  import.meta.env.VITE_SUPABASE_ANON_KEY || "sb_publishable_1e96yGLr_oSVnDbVxAOjKQ_A3L8wOzX"
 );
 
 // Single fixed key for this deployment — no user setup needed.
