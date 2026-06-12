@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Shelf — Migrating your books…</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #0f0f0f;
+      color: #e2e2e2;
+      font-family: system-ui, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100dvh;
+      padding: 2rem;
+    }
+    .card {
+      background: #1a1a1a;
+      border: 1px solid #2a2a2a;
+      border-radius: 1.25rem;
+      padding: 2rem;
+      width: 100%;
+      max-width: 480px;
+      box-shadow: 0 24px 48px rgba(0,0,0,.5);
+    }
+    h1 { font-size: 1.25rem; font-weight: 600; margin-bottom: 1.5rem; }
+    .line {
+      display: flex;
+      align-items: flex-start;
+      gap: .75rem;
+      font-size: .875rem;
+      padding: .4rem 0;
+      border-bottom: 1px solid #222;
+    }
+    .icon { width: 1.25rem; flex-shrink: 0; text-align: center; font-size: 1rem; }
+    .text { flex: 1; line-height: 1.4; color: #a0a0a0; }
+    .text.ok { color: #4ade80; }
+    .text.err { color: #f87171; }
+    .text.warn { color: #fbbf24; }
+    .text.info { color: #e2e2e2; }
+    .done {
+      margin-top: 1.5rem;
+      background: #4ade8018;
+      border: 1px solid #4ade8033;
+      border-radius: .75rem;
+      padding: 1rem 1.25rem;
+      font-size: .875rem;
+      color: #4ade80;
+      display: none;
+    }
+    .fail {
+      margin-top: 1.5rem;
+      background: #f8717118;
+      border: 1px solid #f8717133;
+      border-radius: .75rem;
+      padding: 1rem 1.25rem;
+      font-size: .875rem;
+      color: #f87171;
+      display: none;
+    }
+    .btn {
+      display: inline-block;
+      margin-top: 1rem;
+      background: #c9a84c;
+      color: #0f0f0f;
+      font-weight: 600;
+      font-size: .875rem;
+      padding: .6rem 1.25rem;
+      border-radius: .75rem;
+      text-decoration: none;
+      cursor: pointer;
+      border: none;
+    }
+    .spinner {
+      width: 1.1rem; height: 1.1rem;
+      border: 2px solid #333;
+      border-top-color: #c9a84c;
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      flex-shrink: 0;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+<div class="card">
+  <h1>📚 Migrating your books to Supabase…</h1>
+  <div id="log"></div>
+  <div class="done" id="done">
+    All done! Your books are now synced across devices.
+    <br /><br />
+    <a class="btn" href="/">Go back to Shelf →</a>
+  </div>
+  <div class="fail" id="fail">
+    Something went wrong — see the errors above for details.
+  </div>
+</div>
+
+<script>
+(async () => {
+  const SUPABASE_URL = 'https://mlgehuccskeycoexedsc.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_1e96yGLr_oSVnDbVxAOjKQ_A3L8wOzX';
+  const log = document.getElementById('log');
+  const doneBox = document.getElementById('done');
+  const failBox = document.getElementById('fail');
+  let hasError = false;
+
+  function line(icon, msg, cls = 'info') {
+    const el = document.createElement('div');
+    el.className = 'line';
+    el.innerHTML = `<span class="icon">${icon}</span><span class="text ${cls}">${msg}</span>`;
+    log.appendChild(el);
+    return el;
+  }
+
+  function spin(msg) {
+    const el = document.createElement('div');
+    el.className = 'line';
+    el.innerHTML = `<span class="spinner"></span><span class="text info">${msg}</span>`;
+    log.appendChild(el);
+    return {
+      ok(m) { el.innerHTML = `<span class="icon">✅</span><span class="text ok">${m}</span>`; },
+      err(m) { el.innerHTML = `<span class="icon">❌</span><span class="text err">${m}</span>`; hasError = true; },
+      warn(m) { el.innerHTML = `<span class="icon">⚠️</span><span class="text warn">${m}</span>`; }
+    };
+  }
+
+  const headers = {
+    'apikey': SUPABASE_KEY,
+    'Authorization': `Bearer ${SUPABASE_KEY}`,
+    'Content-Type': 'application/json',
+    'Prefer': 'resolution=merge-duplicates,return=minimal'
+  };
+
+  // 1. Household key
+  let householdKey = localStorage.getItem('shelf.household.v1');
+  if (!householdKey) {
+    line('❌', 'No household key found. Open the main app first, then come back here.', 'err');
+    failBox.style.display = 'block';
+    return;
+  }
+  line('🔑', `Household key: <code>${householdKey}</code>`);
+
+  // 2. Read profiles
+  const rawProfiles = localStorage.getItem('shelf.profiles.v1');
+  if (!rawProfiles) {
+    line('❌', 'No profiles found in localStorage (shelf.profiles.v1).', 'err');
+    failBox.style.display = 'block';
+    return;
+  }
+  let profiles;
+  try { profiles = JSON.parse(rawProfiles); } catch {
+    line('❌', 'Could not parse profiles — localStorage may be corrupted.', 'err');
+    failBox.style.display = 'block';
+    return;
+  }
+  if (!profiles.length) {
+    line('⚠️', 'Profiles array is empty — nothing to migrate.', 'warn');
+    doneBox.style.display = 'block';
+    return;
+  }
+  line('👥', `Found ${profiles.length} profile(s).`);
+
+  // 3. Upload each profile and its books
+  let totalBooks = 0;
+
+  for (const p of profiles) {
+    // Read library
+    let books = [], goal = 24;
+    const rawLib = localStorage.getItem(`shelf.library.v1::${p.id}`);
+    if (!rawLib) {
+      // Try legacy key (pre-multi-profile)
+      const rawLegacy = localStorage.getItem('shelf.library.v1');
+      if (rawLegacy) {
+        try { const l = JSON.parse(rawLegacy); books = l.books ?? []; goal = l.goal ?? 24; } catch {}
+      }
+    } else {
+      try { const l = JSON.parse(rawLib); books = l.books ?? []; goal = l.goal ?? 24; } catch {}
+    }
+
+    // Upload profile
+    const ps = spin(`Uploading profile "${p.name}" (${books.length} books)…`);
+    const pr = await fetch(`${SUPABASE_URL}/rest/v1/profiles`, {
+      method: 'POST', headers,
+      body: JSON.stringify({
+        id: p.id,
+        household_key: householdKey,
+        name: p.name,
+        hue: p.hue,
+        pin: p.pin ?? null,
+        reading_goal: goal
+      })
+    });
+    if (!pr.ok) {
+      const err = await pr.text();
+      ps.err(`Profile "${p.name}" failed (HTTP ${pr.status}): ${err}`);
+      continue;
+    }
+
+    // Upload books
+    let profileBooks = 0;
+    let profileFail = 0;
+    for (const b of books) {
+      const br = await fetch(`${SUPABASE_URL}/rest/v1/books`, {
+        method: 'POST', headers,
+        body: JSON.stringify({
+          id: b.id,
+          profile_id: p.id,
+          household_key: householdKey,
+          title: b.title,
+          author: b.author,
+          cover_url: b.coverUrl,
+          cover_large_url: b.coverLargeUrl,
+          isbn: b.isbn,
+          year: b.year,
+          pages: b.pages,
+          current_page: b.currentPage,
+          shelf: b.shelf,
+          rating: b.rating,
+          notes: b.notes,
+          wish_reason: b.wishReason,
+          priority: b.priority,
+          genres: b.genres,
+          date_added: b.dateAdded,
+          date_started: b.dateStarted,
+          date_finished: b.dateFinished
+        })
+      });
+      if (br.ok) { profileBooks++; totalBooks++; }
+      else {
+        const err = await br.text();
+        profileFail++;
+        line('⚠️', `Book "${b.title}" failed (HTTP ${br.status}): ${err}`, 'warn');
+      }
+    }
+
+    if (profileFail === 0) {
+      ps.ok(`"${p.name}" — ${profileBooks} book(s) uploaded.`);
+    } else {
+      ps.warn(`"${p.name}" — ${profileBooks} uploaded, ${profileFail} failed.`);
+    }
+  }
+
+  line('', '');
+  if (hasError) {
+    line('❌', `Migration finished with errors. ${totalBooks} book(s) uploaded.`, 'err');
+    failBox.style.display = 'block';
+  } else {
+    line('✅', `Migration complete — ${totalBooks} book(s) uploaded across ${profiles.length} profile(s).`, 'ok');
+    doneBox.style.display = 'block';
+  }
+})();
+</script>
+</body>
+</html>

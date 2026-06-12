@@ -1,12 +1,21 @@
 import {
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
   useReducer,
+  useRef,
 } from "react";
 
 import { libraryKeyFor } from "./profiles.js";
+import {
+  fetchLibrary,
+  patchBook,
+  removeBookFromDB,
+  updateGoal,
+  upsertBook,
+} from "./supabase.js";
 
 export const SHELVES = {
   reading: "Currently Reading",
@@ -22,12 +31,12 @@ export function todayISO() {
   return new Date().toISOString().slice(0, 10);
 }
 
-function load(profileId) {
+function loadFromCache(profileId) {
   try {
     const raw = localStorage.getItem(libraryKeyFor(profileId));
     if (raw) return { ...initialState, ...JSON.parse(raw) };
   } catch {
-    // corrupt storage — start fresh rather than crash
+    // corrupt cache — start fresh
   }
   return initialState;
 }
@@ -56,8 +65,6 @@ export function makeBook(partial) {
   };
 }
 
-// Moving shelves carries side effects: starting a book stamps dateStarted,
-// finishing one stamps dateFinished and completes the page progress.
 export function shelfPatch(book, shelf) {
   const patch = { shelf };
   if (shelf === "reading" && !book.dateStarted) patch.dateStarted = todayISO();
@@ -84,6 +91,8 @@ function reducer(state, action) {
       return { ...state, books: state.books.filter((b) => b.id !== action.id) };
     case "setGoal":
       return { ...state, goal: action.goal };
+    case "hydrate":
+      return action.state;
     default:
       return state;
   }
@@ -91,9 +100,33 @@ function reducer(state, action) {
 
 const LibraryContext = createContext(null);
 
-export function LibraryProvider({ profileId, children }) {
-  const [state, dispatch] = useReducer(reducer, profileId, load);
+export function LibraryProvider({ profileId, householdKey, onError, children }) {
+  // Boot from localStorage cache immediately so UI is never blank.
+  const [state, dispatch] = useReducer(reducer, profileId, loadFromCache);
 
+  // Prevent a late-arriving hydration from overwriting user changes.
+  const userEdited = useRef(false);
+
+  // Stable error reporter that always calls the latest onError prop.
+  const onErrorRef = useRef(onError);
+  useEffect(() => { onErrorRef.current = onError; }, [onError]);
+  const report = useCallback(
+    (err) => onErrorRef.current?.(`Sync error: ${err?.message ?? err}`),
+    []
+  );
+
+  // Hydrate from Supabase once on mount.
+  useEffect(() => {
+    fetchLibrary(profileId, householdKey)
+      .then((remote) => {
+        if (!userEdited.current) {
+          dispatch({ type: "hydrate", state: remote });
+        }
+      })
+      .catch(report);
+  }, [profileId, householdKey, report]);
+
+  // Write-through to localStorage so the next cold load is instant.
   useEffect(() => {
     localStorage.setItem(libraryKeyFor(profileId), JSON.stringify(state));
   }, [state, profileId]);
@@ -102,14 +135,40 @@ export function LibraryProvider({ profileId, children }) {
     () => ({
       books: state.books,
       goal: state.goal,
-      addBook: (book) => dispatch({ type: "add", book }),
-      updateBook: (id, patch) => dispatch({ type: "update", id, patch }),
-      removeBook: (id) => dispatch({ type: "remove", id }),
-      moveBook: (book, shelf) =>
-        dispatch({ type: "update", id: book.id, patch: shelfPatch(book, shelf) }),
-      setGoal: (goal) => dispatch({ type: "setGoal", goal }),
+
+      addBook(book) {
+        userEdited.current = true;
+        dispatch({ type: "add", book });
+        upsertBook(book, profileId, householdKey).catch(report);
+      },
+
+      updateBook(id, patch) {
+        userEdited.current = true;
+        dispatch({ type: "update", id, patch });
+        patchBook(id, patch).catch(report);
+      },
+
+      removeBook(id) {
+        userEdited.current = true;
+        dispatch({ type: "remove", id });
+        removeBookFromDB(id).catch(report);
+      },
+
+      moveBook(book, shelf) {
+        const patch = shelfPatch(book, shelf);
+        userEdited.current = true;
+        dispatch({ type: "update", id: book.id, patch });
+        patchBook(book.id, patch).catch(report);
+      },
+
+      setGoal(goal) {
+        userEdited.current = true;
+        dispatch({ type: "setGoal", goal });
+        updateGoal(profileId, goal).catch(report);
+      },
     }),
-    [state]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [state, profileId, householdKey]
   );
 
   return (

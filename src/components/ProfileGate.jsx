@@ -1,10 +1,5 @@
-import { useEffect, useRef, useState } from "react";
-import {
-  avatarColor,
-  createProfile,
-  deleteProfile,
-  loadProfiles,
-} from "../lib/profiles.js";
+import { useRef, useState } from "react";
+import { avatarColor } from "../lib/profiles.js";
 import { BookIcon, PlusIcon, XIcon } from "./Icons.jsx";
 
 export function Avatar({ profile, size = 64, className = "" }) {
@@ -29,8 +24,6 @@ function PinPad({ profile, onUnlock, onCancel }) {
   const [wrong, setWrong] = useState(false);
   const ref = useRef(null);
 
-  useEffect(() => ref.current?.focus(), []);
-
   function tryPin(value) {
     setPin(value);
     setWrong(false);
@@ -52,6 +45,7 @@ function PinPad({ profile, onUnlock, onCancel }) {
       </p>
       <input
         ref={ref}
+        autoFocus
         type="password"
         inputMode="numeric"
         autoComplete="off"
@@ -64,7 +58,7 @@ function PinPad({ profile, onUnlock, onCancel }) {
         }`}
       />
       <p className={`h-4 text-xs ${wrong ? "text-danger" : "text-dim"}`}>
-        {wrong ? "Wrong PIN — try again" : " "}
+        {wrong ? "Wrong PIN — try again" : " "}
       </p>
       <button
         type="button"
@@ -77,14 +71,20 @@ function PinPad({ profile, onUnlock, onCancel }) {
   );
 }
 
-function NewProfileForm({ onCreate, onCancel, firstProfile }) {
+function NewProfileForm({ onCreateProfile, onCancel, firstProfile }) {
   const [name, setName] = useState("");
   const [pin, setPin] = useState("");
+  const [saving, setSaving] = useState(false);
 
-  function submit(e) {
+  async function submit(e) {
     e.preventDefault();
-    if (!name.trim()) return;
-    onCreate(createProfile(name, pin));
+    if (!name.trim() || saving) return;
+    setSaving(true);
+    try {
+      await onCreateProfile(name, pin);
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
@@ -128,23 +128,43 @@ function NewProfileForm({ onCreate, onCancel, firstProfile }) {
         )}
         <button
           type="submit"
-          disabled={!name.trim()}
+          disabled={!name.trim() || saving}
           className="flex-1 rounded-xl bg-gold px-4 py-2.5 text-sm font-semibold text-bg transition-all duration-200 hover:bg-gold-bright active:scale-[0.98] disabled:opacity-40"
         >
-          Start reading
+          {saving ? "Creating…" : "Start reading"}
         </button>
       </div>
     </form>
   );
 }
 
-export default function ProfileGate({ onEnter }) {
-  const [profiles, setProfiles] = useState(loadProfiles);
+export default function ProfileGate({
+  profiles,
+  loading,
+  onEnter,
+  onCreateProfile,
+  onDeleteProfile,
+}) {
   const [pinFor, setPinFor] = useState(null);
   const [creating, setCreating] = useState(false);
   const [managing, setManaging] = useState(false);
 
-  const firstProfile = profiles.length === 0;
+  const firstProfile = !loading && profiles.length === 0;
+
+  async function handleCreate(name, pin) {
+    const profile = await onCreateProfile(name, pin);
+    onEnter(profile);
+  }
+
+  async function handleDelete(p) {
+    if (
+      !confirm(
+        `Delete ${p.name} and their whole library? This can't be undone.`
+      )
+    )
+      return;
+    await onDeleteProfile(p.id);
+  }
 
   function pick(profile) {
     if (profile.pin) setPinFor(profile);
@@ -158,7 +178,12 @@ export default function ProfileGate({ onEnter }) {
         <span className="font-display text-3xl text-ink italic">Shelf</span>
       </div>
 
-      {pinFor ? (
+      {loading ? (
+        <div className="flex flex-col items-center gap-3 text-dim">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-line border-t-gold" />
+          <p className="text-sm">Loading…</p>
+        </div>
+      ) : pinFor ? (
         <PinPad
           profile={pinFor}
           onUnlock={() => onEnter(pinFor)}
@@ -172,7 +197,7 @@ export default function ProfileGate({ onEnter }) {
           <NewProfileForm
             firstProfile={firstProfile}
             onCancel={() => setCreating(false)}
-            onCreate={onEnter}
+            onCreateProfile={handleCreate}
           />
         </>
       ) : (
@@ -191,16 +216,7 @@ export default function ProfileGate({ onEnter }) {
                   <button
                     type="button"
                     aria-label={`Delete ${p.name}`}
-                    onClick={() => {
-                      if (
-                        confirm(
-                          `Delete ${p.name} and their whole library? This can't be undone.`
-                        )
-                      ) {
-                        deleteProfile(p.id);
-                        setProfiles(loadProfiles());
-                      }
-                    }}
+                    onClick={() => handleDelete(p)}
                     className="absolute -top-1 -right-1 z-10 rounded-full bg-danger p-1 text-bg shadow-md"
                   >
                     <XIcon size={12} />
@@ -250,8 +266,8 @@ export default function ProfileGate({ onEnter }) {
       )}
 
       <p className="mt-12 max-w-xs text-center text-xs text-dim">
-        Each reader keeps their own shelves on this device. PINs are a courtesy
-        lock, not real security.
+        Each reader keeps their own shelves, synced across your devices. PINs
+        are a courtesy lock, not real security.
       </p>
     </div>
   );
