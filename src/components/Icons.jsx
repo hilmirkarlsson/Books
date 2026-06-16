@@ -119,6 +119,20 @@ export const SyncIcon = (p) => (
   </Icon>
 );
 
+export const HeadphonesIcon = (p) => (
+  <Icon {...p}>
+    <path d="M3 18v-6a9 9 0 0 1 18 0v6" />
+    <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z" />
+  </Icon>
+);
+
+export const TabletIcon = (p) => (
+  <Icon {...p}>
+    <rect x="5" y="2" width="14" height="20" rx="2" />
+    <circle cx="12" cy="18" r="1" fill="currentColor" stroke="none" />
+  </Icon>
+);
+
 export function StarShape({ size = 18, fill = "none", ...props }) {
   return (
     <svg
