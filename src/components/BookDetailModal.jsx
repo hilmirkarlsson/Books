@@ -190,6 +190,24 @@ export default function BookDetailModal({ bookId, onClose }) {
                 )}
               </div>
               {progress != null && <ProgressBar value={progress} className="mt-3" />}
+              <div className="mt-3 grid grid-cols-2 gap-3">
+                <Field label="Date started">
+                  <input
+                    type="date"
+                    value={draft.dateStarted ?? ""}
+                    onChange={(e) => set({ dateStarted: e.target.value || null })}
+                    className={inputCls}
+                  />
+                </Field>
+                <Field label="Date finished">
+                  <input
+                    type="date"
+                    value={draft.dateFinished ?? ""}
+                    onChange={(e) => set({ dateFinished: e.target.value || null })}
+                    className={inputCls}
+                  />
+                </Field>
+              </div>
             </div>
           )}
 
@@ -227,6 +245,14 @@ export default function BookDetailModal({ bookId, onClose }) {
 
           {draft.shelf === "read" && (
             <div className="grid grid-cols-2 gap-3">
+              <Field label="Date started">
+                <input
+                  type="date"
+                  value={draft.dateStarted ?? ""}
+                  onChange={(e) => set({ dateStarted: e.target.value || null })}
+                  className={inputCls}
+                />
+              </Field>
               <Field label="Date finished">
                 <input
                   type="date"
