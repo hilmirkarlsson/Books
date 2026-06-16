@@ -193,17 +193,19 @@ export default function BookDetailModal({ bookId, onClose }) {
               <div className="mt-3 grid grid-cols-2 gap-3">
                 <Field label="Date started">
                   <input
-                    type="date"
+                    type="text"
                     value={draft.dateStarted ?? ""}
                     onChange={(e) => set({ dateStarted: e.target.value || null })}
+                    placeholder="2024 or 2024-06-15"
                     className={inputCls}
                   />
                 </Field>
                 <Field label="Date finished">
                   <input
-                    type="date"
+                    type="text"
                     value={draft.dateFinished ?? ""}
                     onChange={(e) => set({ dateFinished: e.target.value || null })}
+                    placeholder="2024 or 2024-06-15"
                     className={inputCls}
                   />
                 </Field>
