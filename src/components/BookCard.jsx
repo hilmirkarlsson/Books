@@ -95,7 +95,7 @@ function CardMenu({ book }) {
           <button
             type="button"
             onClick={() => {
-              if (confirm(`Remove “${book.title}” from your library?`))
+              if (confirm(`Remove "${book.title}" from your library?`))
                 removeBook(book.id);
             }}
             className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-danger transition-colors duration-150 hover:bg-hover"
@@ -144,16 +144,16 @@ export default function BookCard({ book, onOpen, style }) {
             {book.currentPage} / {book.pages} pages · {progress}%
           </p>
         )}
-        {book.shelf === “wishlist” && book.wishReason && (
-          <p className=”mt-1 line-clamp-2 text-xs text-dim italic”>
-            “{book.wishReason}”
+        {book.shelf === "wishlist" && book.wishReason && (
+          <p className="mt-1 line-clamp-2 text-xs text-dim italic">
+            "{book.wishReason}"
           </p>
         )}
         {book.formats?.length > 0 && (
-          <div className=”mt-1.5 flex items-center gap-1.5”>
-            {book.formats.includes(“physical”) && <BookIcon size={12} className=”text-dim” />}
-            {book.formats.includes(“kindle”) && <TabletIcon size={12} className=”text-dim” />}
-            {book.formats.includes(“audio”) && <HeadphonesIcon size={12} className=”text-dim” />}
+          <div className="mt-1.5 flex items-center gap-1.5">
+            {book.formats.includes("physical") && <BookIcon size={12} className="text-dim" />}
+            {book.formats.includes("kindle") && <TabletIcon size={12} className="text-dim" />}
+            {book.formats.includes("audio") && <HeadphonesIcon size={12} className="text-dim" />}
           </div>
         )}
       </button>

@@ -333,7 +333,7 @@ export default function BookDetailModal({ bookId, onClose }) {
             type="button"
             aria-label="Remove book"
             onClick={() => {
-              if (confirm(`Remove “${book.title}” from your library?`)) {
+              if (confirm(`Remove "${book.title}" from your library?`)) {
                 removeBook(book.id);
                 onClose();
               }
