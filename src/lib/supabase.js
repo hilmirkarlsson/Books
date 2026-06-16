@@ -29,7 +29,6 @@ function bookToRow(book, profileId, householdKey) {
     wish_reason: book.wishReason,
     priority: book.priority,
     genres: book.genres,
-    formats: book.formats,
     date_added: book.dateAdded,
     date_started: book.dateStarted,
     date_finished: book.dateFinished,
@@ -71,9 +70,12 @@ const CAMEL_TO_SNAKE = {
   dateFinished: "date_finished",
 };
 
+const SKIP_COLUMNS = new Set(["formats"]);
+
 function patchToRow(patch) {
   const row = {};
   for (const [key, val] of Object.entries(patch)) {
+    if (SKIP_COLUMNS.has(key)) continue;
     row[CAMEL_TO_SNAKE[key] ?? key] = val;
   }
   return row;
