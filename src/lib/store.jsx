@@ -178,6 +178,12 @@ export function useLibrary() {
 
 export function formatDate(iso) {
   if (!iso) return "";
+  if (/^\d{4}$/.test(iso)) return iso;
+  if (/^\d{4}-\d{2}$/.test(iso))
+    return new Date(iso + "-01T00:00:00").toLocaleDateString("en-GB", {
+      month: "short",
+      year: "numeric",
+    });
   return new Date(iso + "T00:00:00").toLocaleDateString("en-GB", {
     day: "numeric",
     month: "short",
