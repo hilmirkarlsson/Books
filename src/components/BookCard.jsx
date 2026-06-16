@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { SHELVES, PRIORITIES, useLibrary } from "../lib/store.jsx";
 import StarRating from "./StarRating.jsx";
-import { BookIcon, CheckIcon, DotsIcon, FlagIcon, TrashIcon } from "./Icons.jsx";
+import { BookIcon, CheckIcon, DotsIcon, FlagIcon, HeadphonesIcon, TabletIcon, TrashIcon } from "./Icons.jsx";
 
 export function Cover({ book, className = "" }) {
   const [failed, setFailed] = useState(false);
@@ -144,10 +144,17 @@ export default function BookCard({ book, onOpen, style }) {
             {book.currentPage} / {book.pages} pages · {progress}%
           </p>
         )}
-        {book.shelf === "wishlist" && book.wishReason && (
-          <p className="mt-1 line-clamp-2 text-xs text-dim italic">
+        {book.shelf === “wishlist” && book.wishReason && (
+          <p className=”mt-1 line-clamp-2 text-xs text-dim italic”>
             “{book.wishReason}”
           </p>
+        )}
+        {book.formats?.length > 0 && (
+          <div className=”mt-1.5 flex items-center gap-1.5”>
+            {book.formats.includes(“physical”) && <BookIcon size={12} className=”text-dim” />}
+            {book.formats.includes(“kindle”) && <TabletIcon size={12} className=”text-dim” />}
+            {book.formats.includes(“audio”) && <HeadphonesIcon size={12} className=”text-dim” />}
+          </div>
         )}
       </button>
     </div>

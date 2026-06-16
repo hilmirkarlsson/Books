@@ -59,6 +59,7 @@ export function makeBook(partial) {
     wishReason: "",
     priority: 1,
     genres: [],
+    formats: [],
     dateAdded: todayISO(),
     dateStarted: null,
     dateFinished: null,

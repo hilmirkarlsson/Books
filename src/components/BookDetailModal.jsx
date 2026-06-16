@@ -3,7 +3,7 @@ import Modal from "./Modal.jsx";
 import StarRating from "./StarRating.jsx";
 import { Cover, ProgressBar } from "./BookCard.jsx";
 import { PRIORITIES, SHELVES, shelfPatch, useLibrary } from "../lib/store.jsx";
-import { PlusIcon, TrashIcon, XIcon } from "./Icons.jsx";
+import { BookIcon, HeadphonesIcon, PlusIcon, TabletIcon, TrashIcon, XIcon } from "./Icons.jsx";
 
 function Field({ label, children }) {
   return (
@@ -247,6 +247,40 @@ export default function BookDetailModal({ bookId, onClose }) {
               </Field>
             </div>
           )}
+
+          <Field label="Owned formats">
+            <div className="flex gap-2">
+              {[
+                { key: "physical", label: "Physical", Icon: BookIcon },
+                { key: "kindle", label: "Kindle", Icon: TabletIcon },
+                { key: "audio", label: "Audiobook", Icon: HeadphonesIcon },
+              ].map(({ key, label, Icon }) => {
+                const active = (draft.formats ?? []).includes(key);
+                return (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => {
+                      const current = draft.formats ?? [];
+                      set({
+                        formats: active
+                          ? current.filter((f) => f !== key)
+                          : [...current, key],
+                      });
+                    }}
+                    className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl border px-3 py-2 text-sm transition-all duration-200 ${
+                      active
+                        ? "border-gold-dim bg-gold/10 font-medium text-gold-bright"
+                        : "border-line text-mut hover:bg-hover"
+                    }`}
+                  >
+                    <Icon size={15} />
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
+          </Field>
 
           <Field label="Genre tags">
             <GenreEditor
