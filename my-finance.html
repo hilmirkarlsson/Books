@@ -216,6 +216,7 @@
     <button data-view="travel">Travel</button>
     <button data-view="plan">Budget Plan</button>
     <button data-view="insights">Insights</button>
+    <button data-view="invest">Invest</button>
   </nav>
 
   <!-- OVERVIEW -->
@@ -393,6 +394,88 @@
     <div class="card">
       <div class="card-head"><h3>Recommendations</h3></div>
       <div id="recGroups"></div>
+    </div>
+  </div>
+
+  <!-- INVEST -->
+  <div class="view" id="view-invest">
+    <div class="card">
+      <div class="card-head"><h3>Investing plan</h3><span class="muted-sm">Iceland · two part-time jobs · irregular income</span></div>
+      <p class="muted-sm" style="margin-bottom:14px;">
+        Era Context (the connected-accounts assistant) has no linked accounts yet, so the numbers below are computed from the
+        3-year spending history already tracked in this dashboard instead.
+      </p>
+      <div class="snapshot-grid" id="invStats"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h3>1. How much can you realistically invest per month?</h3></div>
+      <div id="invCapacityText" style="font-size:13.5px; line-height:1.65; color:var(--text-soft);"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h3>2. Where to invest from Iceland</h3></div>
+      <div class="group-title">SÉREIGNARSPARNAÐUR (voluntary pension top-up)</div>
+      <div class="plan-item">
+        <div class="top"><span class="title">Up to 4% of salary, employer matches up to 2%</span></div>
+        <div class="detail">The employer match is free money and tax-free — check your payslip for "mótframlag" to confirm Isavia/Skútan are already matching your contribution before doing anything else. The money is locked until retirement (with limited early-withdrawal exceptions), so treat this as the "set and forget" layer, not your liquid investing.</div>
+      </div>
+      <div class="group-title">ICELANDIC BANK FUNDS</div>
+      <div class="plan-item">
+        <div class="top"><span class="title">Stefnir (Arion), Landsbréf (Landsbankinn), VÍB (Íslandsbanki)</span></div>
+        <div class="detail">Easiest to set up — same login as your bank. Fees usually run 1–2%/yr and the funds are concentrated in the small Icelandic market, so good for the séreign top-up but not ideal as your main long-term holding.</div>
+      </div>
+      <div class="group-title">INTERNATIONAL ETFs</div>
+      <div class="plan-item">
+        <div class="top"><span class="title">Revolut or Interactive Brokers</span></div>
+        <div class="detail">Both accept Iceland residents. Because Iceland is in the EEA, you can't buy US-domiciled ETFs (no KID documentation) — look for Irish-domiciled "UCITS" accumulating ETFs instead (tickers like VWCE or IWDA), which track the same global index at roughly 0.1–0.2%/yr in fees. This should be the bulk of your long-term holding.</div>
+      </div>
+      <div class="group-title">CRYPTO — SMALL SPECULATIVE SLICE ONLY</div>
+      <div class="plan-item">
+        <div class="top"><span class="title">Cap it, don't anchor your plan on it</span></div>
+        <div class="detail">Fine as the speculative slice in the allocation below. Treat it as money you could lose without it changing your life, and keep your own transaction records — gains aren't auto-reported to Skatturinn the way Icelandic bank interest is.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h3>3. Debt vs. emergency fund</h3></div>
+      <div id="invEmergencyText" style="font-size:13.5px; line-height:1.65; color:var(--text-soft);"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h3>4. Suggested beginner allocation</h3><span class="muted-sm">New money, once leaks are fixed</span></div>
+      <div class="board-grid">
+        <div class="chart-box"><canvas id="investAllocChart"></canvas></div>
+        <div style="font-size:13.5px; line-height:1.7; color:var(--text-soft);" id="invPhaseText"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h3>5. Iceland tax basics</h3></div>
+      <div class="plan-item">
+        <div class="top"><span class="title">Flat 22% capital gains tax (fjármagnstekjuskattur)</span></div>
+        <div class="detail">Applies equally to interest, dividends, and capital gains — there's no lower long-term-holding rate like in some countries.</div>
+      </div>
+      <div class="plan-item">
+        <div class="top"><span class="title">300,000 kr. tax-free threshold — twice</span></div>
+        <div class="detail">One 300,000 kr./year threshold (frítekjumark) applies to interest income. A separate 300,000 kr./year threshold applies to gains and dividends from shares on an organized market. Only the amount above each threshold is taxed at 22%.</div>
+      </div>
+      <div class="plan-item">
+        <div class="top"><span class="title">You self-report foreign brokers</span></div>
+        <div class="detail">Icelandic banks withhold the 22% automatically. Revolut and Interactive Brokers don't — you'll need to declare gains, dividends, and interest yourself on your skattframtal each year. Keep statements.</div>
+      </div>
+      <div class="plan-item">
+        <div class="top"><span class="title">Holding US-listed shares: file a W-8BEN</span></div>
+        <div class="detail">If you ever hold individual US stocks (rather than the UCITS ETFs above), a W-8BEN form with your broker typically reduces US dividend withholding from 30% to 15% under the US tax treaty. Confirm the current rate with your broker when you open the account.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <p class="muted-sm">
+        This is general, educational information generated from your tracked spending data — not personalized regulated financial
+        or tax advice. Icelandic tax rules and thresholds are set annually; confirm current figures at skatturinn.is or with a
+        licensed advisor before acting, especially once amounts approach the frítekjumark thresholds above.
+      </p>
     </div>
   </div>
 
@@ -755,6 +838,84 @@ function renderInsights() {
   `).join('');
 }
 
+function renderInvest() {
+  const last6 = DATA.monthlyTrend.slice(-6);
+  const last12 = DATA.monthlyTrend.slice(-12);
+  const avg = arr => arr.reduce((a, b) => a + b, 0) / arr.length;
+  const avgIncome6 = avg(last6.map(m => m.income));
+  const avgSpend6 = avg(last6.map(m => m.spending));
+  const avgNet6 = avg(last6.map(m => m.net));
+  const nets12 = last12.map(m => m.net).slice().sort((a, b) => a - b);
+  const medianNet12 = (nets12[5] + nets12[6]) / 2;
+
+  const auður = DATA.netWorth.breakdown.find(b => b.account.startsWith('Auður')).value;
+  const checking = DATA.netWorth.breakdown.find(b => b.account.includes('checking')).value;
+  const framtid = DATA.netWorth.breakdown.find(b => b.account.startsWith('Framtíð')).value;
+  const milanBudget = DATA.travel.trips.find(t => t.name.startsWith('Milan')).total;
+  const liquid = auður + checking;
+  const bufferLow = avgSpend6 * 3;
+  const bufferHigh = avgSpend6 * 6;
+  const excessCash = Math.max(liquid - bufferHigh - milanBudget, 0);
+  const recoverableWaste = DATA.subscriptions.totalPotentialSavingsMonthly;
+
+  document.getElementById('invStats').innerHTML = [
+    { label: 'Typical month (avg, last 6mo)', value: fmt(avgNet6), sub: 'Skewed up by one large June payout' },
+    { label: 'Typical month (median, last 12mo)', value: fmt(medianNet12), sub: 'A more honest "normal" month' },
+    { label: 'Cash held (Auður + checking)', value: fmt(liquid), sub: '6-month buffer needs ~' + fmt(bufferHigh) },
+    { label: 'Ready to invest now', value: fmt(excessCash), sub: 'After Milan (' + fmt(milanBudget) + ') + 6-month buffer' }
+  ].map(s => `
+    <div class="stat">
+      <div class="label">${s.label}</div>
+      <div class="value">${s.value}</div>
+      <div class="sub">${s.sub}</div>
+    </div>
+  `).join('');
+
+  document.getElementById('invCapacityText').innerHTML = `
+    Your average net cash flow over the last 6 months looks strong (${fmt(avgNet6)}/mo), but that average is carried almost
+    entirely by one large payout in June 2026. The <strong>median</strong> month over the last 12 — a fairer read on a "typical"
+    month with two irregular part-time jobs — is closer to <strong>${fmt(medianNet12)}</strong>. Don't size a monthly investing
+    plan around your best month.<br><br>
+    The good news: this dashboard's Insights tab already flagged about <strong>${fmt(recoverableWaste)}/mo</strong> of recoverable
+    spending (duplicate subscriptions, two gym memberships, impulse shopping). Fix that first and you have a realistic,
+    repeatable <strong>${fmt(recoverableWaste)}–50,000 kr.</strong> a month to invest, independent of which job pays out when.
+    For the irregular paycheck income itself, skip the fixed standing order — instead sweep a fixed <em>percentage</em>
+    (e.g. 20–25%) of every Isavia/Skútan payout into investing the day it lands, so a zero-income month never causes a missed
+    or bounced transfer.
+  `;
+
+  document.getElementById('invEmergencyText').innerHTML = `
+    No debt shows up anywhere in your tracked accounts or transactions — so there's nothing to pay down. Your emergency fund
+    has the opposite problem: it's <strong>overfunded</strong>. A reasonable 3–6 month buffer against your real average spending
+    (${fmt(avgSpend6)}/mo) is ${fmt(bufferLow)}–${fmt(bufferHigh)}. You're holding ${fmt(liquid)} across Auður and checking —
+    set aside the ${fmt(milanBudget)} already earmarked for the Milan trip (see the Travel tab), keep a 6-month buffer, and
+    that still leaves roughly <strong>${fmt(excessCash)}</strong> sitting in a savings account for no reason. That figure lands
+    almost exactly on your Framtíðarreikningur balance (${fmt(framtid)}) — which this dashboard already flagged as "consider
+    investing." That's your starting lump sum.
+  `;
+
+  document.getElementById('invPhaseText').innerHTML = `
+    <strong>Lump sum (${fmt(framtid)}):</strong> don't deploy it all on one day — as a beginner, phase it into index ETFs over
+    roughly 12 months (~${fmt(framtid / 12)}/mo) to avoid the regret of buying right before a dip.<br><br>
+    <strong>New monthly surplus:</strong> split it 70% global index ETF (UCITS, via Revolut/IBKR), 15% séreignarsparnaður
+    top-up (only past whatever your employer already matches), 15% speculative (crypto/individual stocks, capped).<br><br>
+    This skews more conservative than a flat 80/10/10 because you're starting from zero debt and an already-overfunded cash
+    buffer — the priority is getting the existing idle cash working, not just the new monthly savings.
+  `;
+
+  drawChart('investAllocChart', {
+    type: 'doughnut',
+    data: {
+      labels: ['Global index ETF (UCITS)', 'Séreignarsparnaður top-up', 'Speculative (crypto/stocks)'],
+      datasets: [{ data: [70, 15, 15], backgroundColor: [PALETTE[0], PALETTE[1], PALETTE[3]], borderWidth: 0 }]
+    },
+    options: {
+      plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11.5 } } } },
+      cutout: '60%'
+    }
+  });
+}
+
 function switchView(view) {
   document.querySelectorAll('nav.tabs button').forEach(b => b.classList.toggle('active', b.dataset.view === view));
   document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.id === 'view-' + view));
@@ -774,6 +935,7 @@ renderNetWorth();
 renderTravel();
 renderPlan();
 renderInsights();
+renderInvest();
 </script>
 </body>
 </html>
