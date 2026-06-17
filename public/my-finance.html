@@ -4,101 +4,113 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Hilmir's Finance Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
   :root {
-    --bg: #0a1124;
-    --bg-2: #121b35;
-    --bg-3: #1a2647;
-    --card: #141d38;
-    --border: #243152;
-    --text: #f1f5fb;
-    --muted: #8ea0c2;
-    --accent: #2dd4bf;
-    --accent-2: #38bdf8;
-    --accent-3: #6366f1;
-    --pos: #34d399;
-    --neg: #fb7185;
-    --warn: #fbbf24;
-    --shadow: 0 8px 30px rgba(0,0,0,.35);
+    --bg: #f7f7f5;
+    --surface: #ffffff;
+    --border: #e6e4e0;
+    --text: #2b2b2b;
+    --text-soft: #4d4d4a;
+    --muted: #8a8a86;
+    --accent: #5b6cf0;
+    --accent-soft: #edeffd;
+    --pos: #2f9e64;
+    --pos-soft: #e7f5ee;
+    --neg: #d9534f;
+    --neg-soft: #fbeceb;
+    --warn: #b9842b;
+    --warn-soft: #faf1e1;
+    --shadow: 0 1px 2px rgba(15,15,15,.04), 0 6px 16px rgba(15,15,15,.05);
+    --radius: 10px;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    background: radial-gradient(1200px 600px at 80% -10%, #16224a 0%, var(--bg) 55%) fixed;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
     color: var(--text);
     min-height: 100vh;
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
   }
-  .wrap { max-width: 1180px; margin: 0 auto; padding: 20px 18px 80px; }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 32px 24px 80px; }
 
-  header.app {
-    display: flex; align-items: center; justify-content: space-between;
-    gap: 16px; flex-wrap: wrap; margin-bottom: 18px;
-  }
-  .brand { display: flex; align-items: center; gap: 12px; }
-  .brand .logo {
-    width: 44px; height: 44px; border-radius: 12px;
-    background: linear-gradient(135deg, var(--accent), var(--accent-2));
-    display: grid; place-items: center; font-size: 22px;
-    box-shadow: 0 6px 18px rgba(45,212,191,.35);
-  }
-  .brand h1 { font-size: 20px; letter-spacing: .2px; }
-  .brand p { font-size: 12px; color: var(--muted); }
-  .privacy-badge {
-    display: inline-flex; align-items: center; gap: 8px;
-    background: rgba(52,211,153,.1); border: 1px solid rgba(52,211,153,.35);
-    color: var(--pos); padding: 8px 14px; border-radius: 999px;
-    font-size: 13px; font-weight: 600;
-  }
+  header.app { margin-bottom: 22px; }
+  header.app h1 { font-size: 22px; font-weight: 700; letter-spacing: -.2px; }
+  header.app p.subtitle { font-size: 13.5px; color: var(--muted); margin-top: 4px; }
+  header.app p.privacy { font-size: 12px; color: var(--muted); margin-top: 8px; }
 
   .card {
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: 16px; padding: 20px; box-shadow: var(--shadow);
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 22px; box-shadow: var(--shadow);
   }
-  .card + .card { margin-top: 18px; }
+  .card + .card { margin-top: 16px; }
+  .card-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+  .card-head h3 { font-size: 14.5px; font-weight: 600; }
+  .muted-sm { font-size: 12px; color: var(--muted); }
 
   nav.tabs {
-    display: flex; gap: 6px; flex-wrap: wrap; margin: 18px 0;
-    background: var(--bg-2); padding: 6px; border-radius: 14px;
-    border: 1px solid var(--border); position: sticky; top: 8px; z-index: 10;
+    display: flex; gap: 22px; margin: 4px 0 24px;
+    border-bottom: 1px solid var(--border); overflow-x: auto;
   }
+  nav.tabs::-webkit-scrollbar { display: none; }
   nav.tabs button {
-    flex: 1; min-width: 100px; background: transparent; color: var(--muted);
-    border: none; padding: 11px 10px; border-radius: 10px; cursor: pointer;
-    font-size: 13px; font-weight: 600; transition: all .15s; white-space: nowrap;
+    background: transparent; color: var(--muted); border: none; border-bottom: 2px solid transparent;
+    padding: 0 0 11px; margin-bottom: -1px; cursor: pointer; font-size: 13.5px; font-weight: 500;
+    white-space: nowrap; transition: color .12s, border-color .12s; font-family: inherit;
   }
   nav.tabs button:hover { color: var(--text); }
-  nav.tabs button.active {
-    background: linear-gradient(135deg, var(--accent-3), var(--accent-2));
-    color: #fff; box-shadow: 0 6px 16px rgba(56,189,248,.3);
-  }
+  nav.tabs button.active { color: var(--text); border-bottom-color: var(--accent); font-weight: 600; }
 
-  .view { display: none; animation: fade .25s ease; }
+  .view { display: none; animation: fade .2s ease; }
   .view.active { display: block; }
-  @keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  @keyframes fade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
 
-  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px,1fr)); gap: 14px; }
+  /* Compact snapshot row */
+  .snapshot-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px,1fr)); gap: 12px; }
   .stat {
-    background: var(--bg-2); border: 1px solid var(--border);
-    border-radius: 14px; padding: 16px 18px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 9px; padding: 13px 15px;
   }
-  .stat .label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
-  .stat .value { font-size: 22px; font-weight: 800; margin-top: 6px; }
-  .stat .sub { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  .stat .label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .4px; }
+  .stat .value { font-size: 18px; font-weight: 700; margin-top: 5px; }
+  .stat .sub { font-size: 11.5px; color: var(--muted); margin-top: 3px; }
   .value.pos { color: var(--pos); }
   .value.neg { color: var(--neg); }
   .value.accent { color: var(--accent); }
 
-  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .board-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
+  .board-grid > * { min-width: 0; }
+  @media (max-width: 900px) { .board-grid { grid-template-columns: 1fr; } }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
   .grid-2 > * { min-width: 0; }
   @media (max-width: 820px) { .grid-2 { grid-template-columns: 1fr; } }
 
-  h3.section { font-size: 16px; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-  h3.section .tag { font-size: 12px; font-weight: 600; color: var(--muted); }
-  .chart-box { position: relative; height: 300px; }
-  .chart-box.tall { height: 340px; }
+  .chart-box { position: relative; height: 240px; }
+  .chart-box.tall { height: 300px; }
+  .chart-box.small { height: 56px; }
+
+  /* Savings rate block */
+  .big-percent { font-size: 40px; font-weight: 800; letter-spacing: -.5px; }
+  .savings-rate-sub { font-size: 12.5px; color: var(--muted); margin: 4px 0 16px; }
+  .pill-change {
+    display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 999px;
+    font-size: 12px; font-weight: 700; background: var(--pos-soft); color: var(--pos);
+  }
+  .pill-change.neg { background: var(--neg-soft); color: var(--neg); }
+
+  /* Custom category bars (no chart lib needed) */
+  .cat-bar-row { margin-bottom: 12px; }
+  .cat-bar-row:last-child { margin-bottom: 0; }
+  .cat-bar-top { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 5px; }
+  .cat-bar-top .name { font-weight: 500; }
+  .cat-bar-top .amt { font-weight: 600; font-variant-numeric: tabular-nums; }
+  .cat-bar-track { background: var(--bg); border-radius: 999px; height: 7px; overflow: hidden; }
+  .cat-bar-fill { height: 100%; border-radius: 999px; }
 
   .rank-list { list-style: none; }
   .rank-list li {
@@ -108,77 +120,80 @@
   .rank-list li:last-child { border-bottom: none; }
   .rank-name { display: flex; align-items: center; gap: 10px; min-width: 0; }
   .rank-name .idx {
-    width: 24px; height: 24px; border-radius: 7px; background: var(--bg-3);
-    display: grid; place-items: center; font-size: 12px; font-weight: 700; color: var(--accent); flex: none;
+    width: 22px; height: 22px; border-radius: 6px; background: var(--accent-soft);
+    display: grid; place-items: center; font-size: 11.5px; font-weight: 700; color: var(--accent); flex: none;
   }
-  .rank-name .txt { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .rank-val { font-weight: 700; white-space: nowrap; }
+  .rank-val { font-weight: 600; white-space: nowrap; }
 
-  .table-scroll { overflow-x: auto; border-radius: 12px; border: 1px solid var(--border); }
+  .table-scroll { overflow-x: auto; border-radius: 9px; border: 1px solid var(--border); }
   table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
   thead th {
-    background: var(--bg-3); text-align: left; padding: 11px 14px;
-    font-size: 12px; text-transform: uppercase; letter-spacing: .4px; color: var(--muted);
-    white-space: nowrap; position: sticky; top: 0;
+    background: var(--bg); text-align: left; padding: 10px 14px;
+    font-size: 11.5px; text-transform: uppercase; letter-spacing: .4px; color: var(--muted);
+    white-space: nowrap; font-weight: 600; position: sticky; top: 0;
   }
   tbody td { padding: 10px 14px; border-top: 1px solid var(--border); }
-  tbody tr:hover { background: var(--bg-2); }
+  tbody tr:hover { background: var(--bg); }
   td.amt { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; font-weight: 600; }
   td.amt.pos { color: var(--pos); }
   td.amt.neg { color: var(--neg); }
 
   .chip {
-    display: inline-block; padding: 3px 10px; border-radius: 999px;
-    font-size: 12px; font-weight: 600; background: var(--bg-3); color: var(--muted);
+    display: inline-block; padding: 3px 9px; border-radius: 6px;
+    font-size: 11.5px; font-weight: 600; background: var(--bg); color: var(--text-soft);
     border: 1px solid var(--border);
   }
+  .chip-pos { background: var(--pos-soft); color: var(--pos); border-color: transparent; }
+  .chip-neg { background: var(--neg-soft); color: var(--neg); border-color: transparent; }
+  .chip-warn { background: var(--warn-soft); color: var(--warn); border-color: transparent; }
+  .chip-accent { background: var(--accent-soft); color: var(--accent); border-color: transparent; }
+  .chip-neutral { background: var(--bg); color: var(--text-soft); border-color: var(--border); }
 
   .group-title {
-    font-size: 13px; font-weight: 700; color: var(--accent); text-transform: uppercase;
-    letter-spacing: .4px; margin: 22px 0 10px;
+    font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase;
+    letter-spacing: .5px; margin: 24px 0 10px;
   }
   .group-title:first-child { margin-top: 0; }
 
   .rec-item, .plan-item {
-    background: var(--bg-2); border: 1px solid var(--border); border-radius: 12px;
-    padding: 14px 16px; margin-bottom: 10px;
+    background: var(--bg); border: 1px solid var(--border); border-radius: 9px;
+    padding: 14px 16px; margin-bottom: 9px;
   }
   .rec-item .top, .plan-item .top { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; flex-wrap: wrap; }
-  .rec-item .title { font-weight: 700; font-size: 14.5px; }
-  .rec-item .detail { color: var(--muted); font-size: 13px; margin: 6px 0; }
+  .rec-item .title { font-weight: 600; font-size: 14px; }
+  .rec-item .detail { color: var(--text-soft); font-size: 13px; margin: 6px 0; }
   .rec-item .meta { display: flex; gap: 10px; flex-wrap: wrap; font-size: 12.5px; margin-top: 6px; }
   .rec-item .impact { color: var(--pos); font-weight: 600; }
-  .rec-item .action { color: var(--accent-2); }
+  .rec-item .action { color: var(--accent); }
 
   .grade-badge {
-    display: inline-grid; place-items: center; width: 64px; height: 64px; border-radius: 16px;
-    background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #04212b;
-    font-size: 26px; font-weight: 800; flex: none;
+    display: inline-grid; place-items: center; width: 56px; height: 56px; border-radius: 12px;
+    background: var(--accent-soft); color: var(--accent);
+    font-size: 22px; font-weight: 800; flex: none;
   }
-  .score-bar-track { background: var(--bg-3); border-radius: 999px; height: 8px; overflow: hidden; margin-top: 8px; }
-  .score-bar-fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--accent-2), var(--accent)); }
+  .score-bar-track { background: var(--bg); border-radius: 999px; height: 7px; overflow: hidden; margin-top: 7px; }
+  .score-bar-fill { height: 100%; border-radius: 999px; background: var(--accent); }
 
-  .trip-card { background: var(--bg-2); border: 1px solid var(--border); border-radius: 14px; padding: 18px; margin-bottom: 16px; }
+  .trip-card { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 18px; margin-bottom: 14px; }
+  .trip-card:last-child { margin-bottom: 0; }
   .trip-card .top { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
-  .trip-card h4 { font-size: 16px; }
-  .trip-card .period { color: var(--muted); font-size: 13px; }
-  .trip-card .total { font-size: 20px; font-weight: 800; color: var(--accent); }
-  .trip-items { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); gap: 10px; }
-  .trip-line { background: var(--bg-3); border-radius: 10px; padding: 10px 12px; }
-  .trip-line .name { font-weight: 600; font-size: 13.5px; }
-  .trip-line .amt { color: var(--accent-2); font-weight: 700; font-size: 13.5px; margin-top: 2px; }
-  .trip-line .detail { color: var(--muted); font-size: 12px; margin-top: 3px; }
+  .trip-card h4 { font-size: 15px; font-weight: 600; }
+  .trip-card .period { color: var(--muted); font-size: 12.5px; }
+  .trip-card .total { font-size: 18px; font-weight: 700; color: var(--accent); }
+  .trip-items { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); gap: 9px; }
+  .trip-line { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+  .trip-line .name { font-weight: 500; font-size: 13px; }
+  .trip-line .amt { color: var(--accent); font-weight: 700; font-size: 13px; margin-top: 2px; }
+  .trip-line .detail { color: var(--muted); font-size: 11.5px; margin-top: 3px; }
 
-  .flag { font-size: 12px; }
   .muted { color: var(--muted); }
-
-  footer.app { text-align: center; color: var(--muted); font-size: 12px; margin-top: 30px; }
+  footer.app { text-align: center; color: var(--muted); font-size: 12px; margin-top: 36px; }
 
   @media (max-width: 600px) {
-    .wrap { padding: 14px 10px 60px; }
-    nav.tabs button { font-size: 12px; padding: 10px 6px; min-width: 80px; }
-    .brand h1 { font-size: 17px; }
-    .grade-badge { width: 52px; height: 52px; font-size: 21px; }
+    .wrap { padding: 20px 14px 60px; }
+    header.app h1 { font-size: 19px; }
+    .big-percent { font-size: 32px; }
+    .grade-badge { width: 48px; height: 48px; font-size: 18px; }
   }
 </style>
 </head>
@@ -186,42 +201,50 @@
 <div class="wrap">
 
   <header class="app">
-    <div class="brand">
-      <div class="logo">💰</div>
-      <div>
-        <h1>Hilmir's Finance Dashboard</h1>
-        <p>3-year personal financial report — Jan 2024 to Jun 2026</p>
-      </div>
-    </div>
-    <div class="privacy-badge">🔒 No kennitala or account numbers in this data</div>
+    <h1>Hilmir's Finance Dashboard</h1>
+    <p class="subtitle">3-year personal financial report — Jan 2024 to Jun 2026</p>
+    <p class="privacy">No kennitala or bank account numbers appear in this data.</p>
   </header>
 
   <nav class="tabs" id="tabs">
-    <button data-view="overview" class="active">📊 Overview</button>
-    <button data-view="trends">📈 Trends</button>
-    <button data-view="categories">🍩 Categories</button>
-    <button data-view="transactions">🔍 Key Tx</button>
-    <button data-view="subscriptions">💳 Subs</button>
-    <button data-view="networth">🏦 Net Worth</button>
-    <button data-view="travel">✈️ Travel</button>
-    <button data-view="plan">🎯 Budget Plan</button>
-    <button data-view="insights">💡 Insights</button>
+    <button data-view="overview" class="active">Overview</button>
+    <button data-view="trends">Trends</button>
+    <button data-view="categories">Categories</button>
+    <button data-view="transactions">Transactions</button>
+    <button data-view="subscriptions">Subscriptions</button>
+    <button data-view="networth">Net Worth</button>
+    <button data-view="travel">Travel</button>
+    <button data-view="plan">Budget Plan</button>
+    <button data-view="insights">Insights</button>
   </nav>
 
   <!-- OVERVIEW -->
   <div class="view active" id="view-overview">
-    <div class="card">
-      <h3 class="section">Snapshot</h3>
-      <div class="stats" id="ovStats"></div>
-    </div>
-    <div class="grid-2" style="margin-top:18px;">
+    <div class="snapshot-grid" id="ovStats"></div>
+
+    <div class="board-grid">
       <div class="card">
-        <h3 class="section">📈 Income vs spending — full history</h3>
-        <div class="chart-box tall"><canvas id="overviewTrendChart"></canvas></div>
+        <div class="card-head"><h3>Income vs Expenses</h3><span class="muted-sm">Last 4 months</span></div>
+        <div class="muted-sm" id="ieSummary" style="margin-bottom:12px;"></div>
+        <div class="chart-box"><canvas id="incomeExpenseChart"></canvas></div>
       </div>
+
       <div class="card">
-        <h3 class="section">🍩 2026 spending by category (Jan–Jun)</h3>
-        <div class="chart-box tall"><canvas id="overviewCatChart"></canvas></div>
+        <div class="card-head"><h3>Savings Rate</h3></div>
+        <div class="big-percent" id="savingsRateBig"></div>
+        <div class="savings-rate-sub" id="savingsRateSub"></div>
+        <div class="chart-box small"><canvas id="savingsRateSpark"></canvas></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h3>Spending by Category</h3><span class="muted-sm">Top 6 — 2026 YTD</span></div>
+        <div id="topCategoryBars"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h3>Savings Growth</h3><span class="pill-change" id="growthChangeLabel"></span></div>
+        <div class="chart-box"><canvas id="growthChart"></canvas></div>
+        <div class="muted-sm" id="growthFootnote" style="margin-top:10px;"></div>
       </div>
     </div>
   </div>
@@ -229,11 +252,11 @@
   <!-- TRENDS -->
   <div class="view" id="view-trends">
     <div class="card">
-      <h3 class="section">📈 Monthly income, spending & net — Jan 2024 to Jun 2026</h3>
+      <div class="card-head"><h3>Monthly income, spending &amp; net — Jan 2024 to Jun 2026</h3></div>
       <div class="chart-box tall"><canvas id="trendChart"></canvas></div>
     </div>
     <div class="card">
-      <h3 class="section">📋 Monthly detail</h3>
+      <div class="card-head"><h3>Monthly detail</h3></div>
       <div class="table-scroll">
         <table>
           <thead><tr><th>Month</th><th style="text-align:right">Income</th><th style="text-align:right">Spending</th><th style="text-align:right">Net</th></tr></thead>
@@ -246,11 +269,11 @@
   <!-- CATEGORIES -->
   <div class="view" id="view-categories">
     <div class="card">
-      <h3 class="section">🍩 Yearly spend by category</h3>
+      <div class="card-head"><h3>Yearly spend by category</h3></div>
       <div class="chart-box tall"><canvas id="yearlyCatChart"></canvas></div>
     </div>
     <div class="card">
-      <h3 class="section">📋 Category breakdown by year</h3>
+      <div class="card-head"><h3>Category breakdown by year</h3></div>
       <div class="table-scroll">
         <table>
           <thead><tr><th>Category</th><th style="text-align:right">2024</th><th style="text-align:right">2025</th><th style="text-align:right">2026 (H1)</th><th style="text-align:right">2026 (annualised)</th></tr></thead>
@@ -259,7 +282,7 @@
       </div>
     </div>
     <div class="card">
-      <h3 class="section">📅 2026 category breakdown — month by month</h3>
+      <div class="card-head"><h3>2026 category breakdown — month by month</h3></div>
       <div class="table-scroll">
         <table>
           <thead><tr><th>Category</th><th style="text-align:right">Jan</th><th style="text-align:right">Feb</th><th style="text-align:right">Mar</th><th style="text-align:right">Apr</th><th style="text-align:right">May</th><th style="text-align:right">Jun</th><th style="text-align:right">Total</th><th style="text-align:right">Avg/mo</th></tr></thead>
@@ -272,7 +295,7 @@
   <!-- TRANSACTIONS -->
   <div class="view" id="view-transactions">
     <div class="card">
-      <h3 class="section">🔍 Flagged key transactions <span class="tag">18 notable purchases worth a second look</span></h3>
+      <div class="card-head"><h3>Flagged key transactions</h3><span class="muted-sm">18 notable purchases worth a second look</span></div>
       <div class="table-scroll">
         <table>
           <thead><tr><th>Date</th><th>Merchant</th><th style="text-align:right">Amount</th><th>Category</th><th>Flag</th><th>Insight</th></tr></thead>
@@ -285,29 +308,29 @@
   <!-- SUBSCRIPTIONS -->
   <div class="view" id="view-subscriptions">
     <div class="card">
-      <h3 class="section">💳 Subscriptions <span class="tag">Status confirmed by you</span></h3>
+      <div class="card-head"><h3>Subscriptions</h3><span class="muted-sm">Status confirmed by you</span></div>
       <div class="table-scroll">
         <table>
           <thead><tr><th>Status</th><th>Service</th><th>Billing</th><th style="text-align:right">Monthly</th><th style="text-align:right">Annual</th><th>Notes</th></tr></thead>
           <tbody id="subsTableBody"></tbody>
         </table>
       </div>
-      <div class="stats" style="margin-top:16px;">
+      <div class="snapshot-grid" style="margin-top:16px;">
         <div class="stat"><div class="label">Currently active — monthly</div><div class="value pos" id="subsActiveMonthly"></div></div>
         <div class="stat"><div class="label">Currently active — annual</div><div class="value pos" id="subsActiveAnnual"></div></div>
-        <div class="stat"><div class="label">Report total (Jun 2026) — monthly</div><div class="value muted" id="subsTotalMonthly"></div></div>
-        <div class="stat"><div class="label">Report total (Jun 2026) — annual</div><div class="value muted" id="subsTotalAnnual"></div></div>
+        <div class="stat"><div class="label">Report total (Jun 2026) — monthly</div><div class="value" id="subsTotalMonthly"></div></div>
+        <div class="stat"><div class="label">Report total (Jun 2026) — annual</div><div class="value" id="subsTotalAnnual"></div></div>
       </div>
     </div>
     <div class="card">
-      <h3 class="section">✂️ Savings opportunities</h3>
+      <div class="card-head"><h3>Savings opportunities</h3></div>
       <div class="table-scroll">
         <table>
           <thead><tr><th>Cut</th><th>Reason</th><th style="text-align:right">Monthly save</th><th style="text-align:right">Annual save</th></tr></thead>
           <tbody id="savingsTableBody"></tbody>
         </table>
       </div>
-      <div class="stats" style="margin-top:16px;">
+      <div class="snapshot-grid" style="margin-top:16px;">
         <div class="stat"><div class="label">Potential monthly savings</div><div class="value pos" id="savingsTotalMonthly"></div></div>
         <div class="stat"><div class="label">Potential annual savings</div><div class="value pos" id="savingsTotalAnnual"></div></div>
       </div>
@@ -317,7 +340,7 @@
   <!-- NET WORTH -->
   <div class="view" id="view-networth">
     <div class="card">
-      <h3 class="section">🏦 Auður savings balance over time</h3>
+      <div class="card-head"><h3>Auður savings balance over time</h3></div>
       <div class="chart-box tall"><canvas id="balanceChart"></canvas></div>
       <div class="table-scroll" style="margin-top:14px;">
         <table>
@@ -326,15 +349,15 @@
         </table>
       </div>
     </div>
-    <div class="grid-2" style="margin-top:18px;">
+    <div class="grid-2" style="margin-top:16px;">
       <div class="card">
-        <h3 class="section">🥧 Net worth breakdown</h3>
+        <div class="card-head"><h3>Net worth breakdown</h3></div>
         <div class="chart-box"><canvas id="netWorthChart"></canvas></div>
       </div>
       <div class="card">
-        <h3 class="section">📋 Accounts</h3>
+        <div class="card-head"><h3>Accounts</h3></div>
         <ul class="rank-list" id="netWorthList"></ul>
-        <div class="stats" style="margin-top:16px;">
+        <div class="snapshot-grid" style="margin-top:16px;">
           <div class="stat"><div class="label">Total net worth</div><div class="value accent" id="netWorthTotal"></div></div>
         </div>
       </div>
@@ -343,8 +366,8 @@
 
   <!-- TRAVEL -->
   <div class="view" id="view-travel">
-    <div class="card" id="travelCard">
-      <h3 class="section">✈️ Trips</h3>
+    <div class="card">
+      <div class="card-head"><h3>Trips</h3></div>
       <div id="tripsContainer"></div>
     </div>
   </div>
@@ -352,7 +375,7 @@
   <!-- BUDGET PLAN -->
   <div class="view" id="view-plan">
     <div class="card">
-      <h3 class="section">🎯 Budget plan <span class="tag" id="planBasis"></span></h3>
+      <div class="card-head"><h3>Budget plan</h3><span class="muted-sm" id="planBasis"></span></div>
       <div id="planGroups"></div>
     </div>
   </div>
@@ -360,17 +383,15 @@
   <!-- INSIGHTS (Recommendations + Budget Score) -->
   <div class="view" id="view-insights">
     <div class="card">
-      <h3 class="section">⭐ Budget score</h3>
-      <div style="display:flex; gap:18px; align-items:center; margin-bottom:18px; flex-wrap:wrap;">
+      <div class="card-head"><h3>Budget score</h3></div>
+      <div style="display:flex; gap:16px; align-items:center; margin-bottom:18px; flex-wrap:wrap;">
         <div class="grade-badge" id="overallGrade"></div>
-        <div>
-          <div style="font-size:15px; font-weight:700;" id="overallSummary"></div>
-        </div>
+        <div style="font-size:14.5px; font-weight:600;" id="overallSummary"></div>
       </div>
       <div id="scoreCategories"></div>
     </div>
     <div class="card">
-      <h3 class="section">💡 Recommendations</h3>
+      <div class="card-head"><h3>Recommendations</h3></div>
       <div id="recGroups"></div>
     </div>
   </div>
@@ -391,6 +412,27 @@ function fmtPlain(n) {
   return Math.round(n).toLocaleString('is-IS').replace(/,/g, '.');
 }
 
+const EMOJI_RE = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}️‍]/gu;
+function stripEmoji(s) {
+  return (s || '').replace(EMOJI_RE, '').replace(/\s+/g, ' ').trim();
+}
+function classify(raw) {
+  const text = stripEmoji(raw);
+  const l = text.toLowerCase();
+  if (/^high$/.test(l)) return { text, tone: 'neg' };
+  if (/^med(ium)?$/.test(l)) return { text, tone: 'warn' };
+  if (/^low$/.test(l)) return { text, tone: 'neutral' };
+  if (/regularly over|duplicate|impulse/.test(l)) return { text, tone: 'neg' };
+  if (/over budget/.test(l)) return { text, tone: 'warn' };
+  if (/on track|smart/.test(l)) return { text, tone: 'pos' };
+  if (/start now|automate/.test(l)) return { text, tone: 'accent' };
+  return { text, tone: 'neutral' };
+}
+function chip(raw) {
+  const { text, tone } = classify(raw);
+  return `<span class="chip chip-${tone}">${text}</span>`;
+}
+
 const charts = {};
 function drawChart(id, config) {
   const el = document.getElementById(id);
@@ -399,53 +441,90 @@ function drawChart(id, config) {
   charts[id] = new Chart(el.getContext('2d'), config);
 }
 
-const CHART_DEFAULTS = {
-  color: '#8ea0c2',
-  grid: 'rgba(255,255,255,.06)'
-};
-Chart.defaults.color = CHART_DEFAULTS.color;
-Chart.defaults.font.family = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+Chart.defaults.color = '#4d4d4a';
+Chart.defaults.font.family = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+const GRID = 'rgba(15,15,15,.06)';
 
-const PALETTE = ['#2dd4bf','#38bdf8','#6366f1','#fbbf24','#fb7185','#34d399','#a78bfa','#f472b6','#facc15','#60a5fa','#4ade80','#f87171','#94a3b8'];
+const PALETTE = ['#5b6cf0','#2f9e64','#b9842b','#d9534f','#0e9488','#8b6fd6','#64748b','#0284c7','#65a30d','#b45309','#94a3b8','#9333ea','#475569'];
 
 function renderOverview() {
-  const wrap = document.getElementById('ovStats');
-  wrap.innerHTML = DATA.overview.map(s => `
+  document.getElementById('ovStats').innerHTML = DATA.overview.map(s => `
     <div class="stat">
       <div class="label">${s.label}</div>
-      <div class="value accent">${s.value}</div>
+      <div class="value">${s.value}</div>
       <div class="sub">${s.sub}</div>
     </div>
   `).join('');
 
-  drawChart('overviewTrendChart', {
-    type: 'line',
+  // Income vs Expenses — current + last 3 months
+  const last4 = DATA.monthlyTrend.slice(-4);
+  const cur = last4[last4.length - 1];
+  document.getElementById('ieSummary').innerHTML =
+    `<strong>${cur.month}:</strong> Income ${fmt(cur.income)} · Spending ${fmt(cur.spending)} · Net <span style="color:${cur.net >= 0 ? 'var(--pos)' : 'var(--neg)'}">${fmt(cur.net)}</span>`;
+  drawChart('incomeExpenseChart', {
+    type: 'bar',
     data: {
-      labels: DATA.monthlyTrend.map(m => m.month),
+      labels: last4.map(m => m.month),
       datasets: [
-        { label: 'Income', data: DATA.monthlyTrend.map(m => m.income), borderColor: '#34d399', backgroundColor: 'rgba(52,211,153,.1)', tension: .3, fill: true },
-        { label: 'Spending', data: DATA.monthlyTrend.map(m => m.spending), borderColor: '#fb7185', backgroundColor: 'rgba(251,113,133,.1)', tension: .3, fill: true }
+        { label: 'Income', data: last4.map(m => m.income), backgroundColor: '#5b6cf0', borderRadius: 4 },
+        { label: 'Spending', data: last4.map(m => m.spending), backgroundColor: '#d9534f', borderRadius: 4 }
       ]
     },
     options: {
       responsive: true, maintainAspectRatio: false,
-      scales: { x: { grid: { color: CHART_DEFAULTS.grid } }, y: { grid: { color: CHART_DEFAULTS.grid }, ticks: { callback: v => fmtPlain(v) } } },
-      plugins: { legend: { labels: { color: '#f1f5fb' } } }
+      scales: { x: { grid: { display: false } }, y: { grid: { color: GRID }, ticks: { callback: v => fmtPlain(v) } } },
+      plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 11.5 } } } }
     }
   });
 
-  const cats2026 = DATA.monthly2026Category.filter(c => c.category !== 'TOTAL SPENDING');
-  drawChart('overviewCatChart', {
-    type: 'doughnut',
+  // Savings rate
+  const rateStat = DATA.overview.find(o => o.label === 'Est. Savings Rate');
+  document.getElementById('savingsRateBig').textContent = rateStat.value;
+  document.getElementById('savingsRateSub').textContent = rateStat.sub;
+  const paidMonths = DATA.monthlyTrend.filter(m => m.income > 0).slice(-10);
+  drawChart('savingsRateSpark', {
+    type: 'line',
     data: {
-      labels: cats2026.map(c => c.category),
-      datasets: [{ data: cats2026.map(c => c.total), backgroundColor: PALETTE, borderWidth: 0 }]
+      labels: paidMonths.map(m => m.month),
+      datasets: [{ data: paidMonths.map(m => (m.net / m.income) * 100), borderColor: '#5b6cf0', backgroundColor: 'rgba(91,108,240,.08)', tension: .35, fill: true, pointRadius: 0, borderWidth: 2 }]
     },
     options: {
       responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { position: 'bottom', labels: { color: '#f1f5fb', boxWidth: 12, font: { size: 11 } } } }
+      scales: { x: { display: false }, y: { display: false } },
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => Math.round(c.parsed.y) + '%' } } }
     }
   });
+
+  // Spending by category — top 6, custom bars
+  const cats = DATA.monthly2026Category.filter(c => c.category !== 'TOTAL SPENDING').slice().sort((a, b) => b.total - a.total).slice(0, 6);
+  const maxTotal = Math.max(...cats.map(c => c.total));
+  document.getElementById('topCategoryBars').innerHTML = cats.map((c, i) => `
+    <div class="cat-bar-row">
+      <div class="cat-bar-top"><span class="name">${c.category}</span><span class="amt">${fmt(c.total)}</span></div>
+      <div class="cat-bar-track"><div class="cat-bar-fill" style="width:${(c.total / maxTotal * 100).toFixed(1)}%; background:${PALETTE[i % PALETTE.length]};"></div></div>
+    </div>
+  `).join('');
+
+  // Savings growth (Auður — only series with full history)
+  const bh = DATA.netWorth.balanceHistory;
+  const change = ((bh[bh.length - 1].balance - bh[0].balance) / bh[0].balance * 100);
+  const pill = document.getElementById('growthChangeLabel');
+  pill.textContent = (change >= 0 ? '+' : '') + change.toFixed(1) + '% since ' + bh[0].period;
+  pill.classList.toggle('neg', change < 0);
+  drawChart('growthChart', {
+    type: 'line',
+    data: {
+      labels: bh.map(b => b.period),
+      datasets: [{ label: 'Auður balance', data: bh.map(b => b.balance), borderColor: '#2f9e64', backgroundColor: 'rgba(47,158,100,.08)', tension: .3, fill: true, pointRadius: 2 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      scales: { x: { grid: { display: false } }, y: { grid: { color: GRID }, ticks: { callback: v => fmtPlain(v) } } },
+      plugins: { legend: { display: false } }
+    }
+  });
+  document.getElementById('growthFootnote').textContent =
+    `Auður savings only — the account with a full historical series. Framtíðarreikningur (${fmt(3342415)}) is a current snapshot with no historical timeline in the source report. Combined net worth today: ${fmt(DATA.netWorth.total)}.`;
 }
 
 function renderTrends() {
@@ -454,15 +533,15 @@ function renderTrends() {
     data: {
       labels: DATA.monthlyTrend.map(m => m.month),
       datasets: [
-        { label: 'Income', data: DATA.monthlyTrend.map(m => m.income), backgroundColor: '#34d399' },
-        { label: 'Spending', data: DATA.monthlyTrend.map(m => -m.spending), backgroundColor: '#fb7185' },
-        { label: 'Net', type: 'line', data: DATA.monthlyTrend.map(m => m.net), borderColor: '#38bdf8', backgroundColor: '#38bdf8', tension: .3 }
+        { label: 'Income', data: DATA.monthlyTrend.map(m => m.income), backgroundColor: '#5b6cf0' },
+        { label: 'Spending', data: DATA.monthlyTrend.map(m => -m.spending), backgroundColor: '#d9534f' },
+        { label: 'Net', type: 'line', data: DATA.monthlyTrend.map(m => m.net), borderColor: '#2f9e64', backgroundColor: '#2f9e64', tension: .3, pointRadius: 0 }
       ]
     },
     options: {
       responsive: true, maintainAspectRatio: false,
-      scales: { x: { grid: { color: CHART_DEFAULTS.grid } }, y: { grid: { color: CHART_DEFAULTS.grid }, ticks: { callback: v => fmtPlain(v) } } },
-      plugins: { legend: { labels: { color: '#f1f5fb' } } }
+      scales: { x: { grid: { display: false } }, y: { grid: { color: GRID }, ticks: { callback: v => fmtPlain(v) } } },
+      plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 11.5 } } } }
     }
   });
 
@@ -483,20 +562,20 @@ function renderCategories() {
     data: {
       labels: rows.map(c => c.category),
       datasets: [
-        { label: '2024', data: rows.map(c => c.y2024), backgroundColor: '#2dd4bf' },
-        { label: '2025', data: rows.map(c => c.y2025), backgroundColor: '#38bdf8' },
-        { label: '2026 (annualised)', data: rows.map(c => c.y2026ann), backgroundColor: '#6366f1' }
+        { label: '2024', data: rows.map(c => c.y2024), backgroundColor: '#5b6cf0' },
+        { label: '2025', data: rows.map(c => c.y2025), backgroundColor: '#0e9488' },
+        { label: '2026 (annualised)', data: rows.map(c => c.y2026ann), backgroundColor: '#b9842b' }
       ]
     },
     options: {
       responsive: true, maintainAspectRatio: false,
-      scales: { x: { grid: { display: false }, ticks: { font: { size: 10 } } }, y: { grid: { color: CHART_DEFAULTS.grid }, ticks: { callback: v => fmtPlain(v) } } },
-      plugins: { legend: { labels: { color: '#f1f5fb' } } }
+      scales: { x: { grid: { display: false }, ticks: { font: { size: 10 } } }, y: { grid: { color: GRID }, ticks: { callback: v => fmtPlain(v) } } },
+      plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 11.5 } } } }
     }
   });
 
   document.getElementById('yearlyCatTableBody').innerHTML = DATA.yearlyCategory.map(c => `
-    <tr style="${c.category === 'TOTAL' ? 'font-weight:700;background:var(--bg-2);' : ''}">
+    <tr style="${c.category === 'TOTAL' ? 'font-weight:700;background:var(--bg);' : ''}">
       <td>${c.category}</td>
       <td class="amt">${fmt(c.y2024)}</td>
       <td class="amt">${fmt(c.y2025)}</td>
@@ -506,7 +585,7 @@ function renderCategories() {
   `).join('');
 
   document.getElementById('monthly2026TableBody').innerHTML = DATA.monthly2026Category.map(c => `
-    <tr style="${c.category === 'TOTAL SPENDING' ? 'font-weight:700;background:var(--bg-2);' : ''}">
+    <tr style="${c.category === 'TOTAL SPENDING' ? 'font-weight:700;background:var(--bg);' : ''}">
       <td>${c.category}</td>
       <td class="amt">${fmt(c.jan)}</td>
       <td class="amt">${fmt(c.feb)}</td>
@@ -526,9 +605,9 @@ function renderTransactions() {
       <td>${t.date}</td>
       <td>${t.merchant}</td>
       <td class="amt">${t.amount === null ? '—' : fmt(t.amount)}</td>
-      <td><span class="chip">${t.category}</span></td>
-      <td class="flag">${t.flag}</td>
-      <td class="muted" style="font-size:12.5px;">${t.insight}</td>
+      <td><span class="chip chip-neutral">${t.category}</span></td>
+      <td>${chip(t.flag)}</td>
+      <td class="muted" style="font-size:12.5px;">${stripEmoji(t.insight)}</td>
     </tr>
   `).join('');
 }
@@ -536,13 +615,13 @@ function renderTransactions() {
 function renderSubscriptions() {
   const s = DATA.subscriptions;
   document.getElementById('subsTableBody').innerHTML = s.items.map(i => `
-    <tr style="${i.active ? '' : 'opacity:.5;'}">
-      <td>${i.active ? '<span class="chip" style="color:var(--pos);border-color:rgba(52,211,153,.4);">✅ Active</span>' : '<span class="chip" style="color:var(--neg);border-color:rgba(251,113,133,.4);">❌ Cancelled</span>'}</td>
+    <tr style="${i.active ? '' : 'opacity:.55;'}">
+      <td>${i.active ? '<span class="chip chip-pos">Active</span>' : '<span class="chip chip-neg">Cancelled</span>'}</td>
       <td><strong style="${i.active ? '' : 'text-decoration:line-through;'}">${i.service}</strong><br><span class="muted" style="font-size:11.5px;">${i.domain}</span></td>
       <td>${i.billing}</td>
       <td class="amt">${fmt(i.monthly)}</td>
       <td class="amt">${fmt(i.annual)}</td>
-      <td class="muted" style="font-size:12.5px;">${i.notes}</td>
+      <td class="muted" style="font-size:12.5px;">${stripEmoji(i.notes)}</td>
     </tr>
   `).join('');
   document.getElementById('subsActiveMonthly').textContent = fmt(s.currentActiveMonthly);
@@ -568,11 +647,11 @@ function renderNetWorth() {
     type: 'line',
     data: {
       labels: nw.balanceHistory.map(b => b.period),
-      datasets: [{ label: 'Auður balance', data: nw.balanceHistory.map(b => b.balance), borderColor: '#2dd4bf', backgroundColor: 'rgba(45,212,191,.12)', tension: .3, fill: true }]
+      datasets: [{ label: 'Auður balance', data: nw.balanceHistory.map(b => b.balance), borderColor: '#5b6cf0', backgroundColor: 'rgba(91,108,240,.08)', tension: .3, fill: true, pointRadius: 2 }]
     },
     options: {
       responsive: true, maintainAspectRatio: false,
-      scales: { x: { grid: { color: CHART_DEFAULTS.grid } }, y: { grid: { color: CHART_DEFAULTS.grid }, ticks: { callback: v => fmtPlain(v) } } },
+      scales: { x: { grid: { display: false } }, y: { grid: { color: GRID }, ticks: { callback: v => fmtPlain(v) } } },
       plugins: { legend: { display: false } }
     }
   });
@@ -594,7 +673,7 @@ function renderNetWorth() {
     },
     options: {
       responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { position: 'bottom', labels: { color: '#f1f5fb', boxWidth: 12, font: { size: 11 } } } }
+      plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 11 } } } }
     }
   });
 
@@ -631,17 +710,17 @@ function renderTravel() {
 }
 
 function renderPlan() {
-  document.getElementById('planBasis').textContent = DATA.budgetPlan.basis;
+  document.getElementById('planBasis').textContent = stripEmoji(DATA.budgetPlan.basis);
   document.getElementById('planGroups').innerHTML = DATA.budgetPlan.groups.map(g => `
-    <div class="group-title">${g.title}</div>
+    <div class="group-title">${stripEmoji(g.title)}</div>
     ${g.items.map(i => `
       <div class="plan-item">
         <div class="top">
           <span class="title" style="font-weight:600;">${i.item}</span>
           <span class="amt" style="font-weight:700;">${fmt(i.budget)}</span>
         </div>
-        <div class="detail">${i.notes}</div>
-        <div class="meta"><span class="chip">${i.status}</span></div>
+        <div class="detail" style="color:var(--text-soft); font-size:13px; margin:6px 0;">${i.notes}</div>
+        <div class="meta">${chip(i.status)}</div>
       </div>
     `).join('')}
   `).join('');
@@ -653,7 +732,7 @@ function renderInsights() {
   document.getElementById('scoreCategories').innerHTML = DATA.budgetScore.categories.map(c => `
     <div style="margin-bottom:14px;">
       <div style="display:flex; justify-content:space-between; font-size:13.5px; margin-bottom:4px;">
-        <span><strong>${c.category}</strong> <span class="chip" style="margin-left:6px;">${c.grade}</span></span>
+        <span><strong>${c.category}</strong> <span class="chip chip-neutral" style="margin-left:6px;">${c.grade}</span></span>
         <span class="muted">${c.score}/100</span>
       </div>
       <div class="score-bar-track"><div class="score-bar-fill" style="width:${c.score}%;"></div></div>
@@ -662,12 +741,12 @@ function renderInsights() {
   `).join('');
 
   document.getElementById('recGroups').innerHTML = DATA.recommendations.groups.map(g => `
-    <div class="group-title">${g.title}</div>
+    <div class="group-title">${stripEmoji(g.title)}</div>
     ${g.items.map(i => `
       <div class="rec-item">
         <div class="top">
           <span class="title">${i.recommendation}</span>
-          <span class="chip">${i.priority}</span>
+          ${chip(i.priority)}
         </div>
         <div class="detail">${i.detail}</div>
         <div class="meta"><span class="impact">${i.impact}</span><span class="action">${i.action}</span></div>
