@@ -427,8 +427,8 @@
       </div>
       <div class="group-title">INTERNATIONAL ETFs</div>
       <div class="plan-item">
-        <div class="top"><span class="title">Revolut or Interactive Brokers</span></div>
-        <div class="detail">Both accept Iceland residents. Because Iceland is in the EEA, you can't buy US-domiciled ETFs (no KID documentation) — look for Irish-domiciled "UCITS" accumulating ETFs instead (tickers like VWCE or IWDA), which track the same global index at roughly 0.1–0.2%/yr in fees. This should be the bulk of your long-term holding.</div>
+        <div class="top"><span class="title">Interactive Brokers for size, Revolut for the monthly drip</span></div>
+        <div class="detail">Both accept Iceland residents. Because Iceland is in the EEA, you can't buy US-domiciled ETFs (no KID documentation) — look for Irish-domiciled "UCITS" accumulating ETFs instead (e.g. VWCE), which track the same global index at roughly 0.1–0.2%/yr in fees. Use IBKR for anything wired in bulk (its FX fee is ~0.002%, negligible at size) and Revolut for small recurring monthly buys (native ISK, no wire fee) — see the action-plan tables below for the exact split.</div>
       </div>
       <div class="group-title">CRYPTO — SMALL SPECULATIVE SLICE ONLY</div>
       <div class="plan-item">
@@ -443,11 +443,30 @@
     </div>
 
     <div class="card">
-      <div class="card-head"><h3>4. Suggested beginner allocation</h3><span class="muted-sm">New money, once leaks are fixed</span></div>
-      <div class="board-grid">
-        <div class="chart-box"><canvas id="investAllocChart"></canvas></div>
-        <div style="font-size:13.5px; line-height:1.7; color:var(--text-soft);" id="invPhaseText"></div>
+      <div class="card-head"><h3>4. Action plan — lump sum</h3><span class="muted-sm" id="invLumpHead"></span></div>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>Slice</th><th style="text-align:right">Amount</th><th>Platform</th><th>Action</th></tr></thead>
+          <tbody id="invLumpTableBody"></tbody>
+        </table>
       </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h3>Action plan — monthly recurring</h3><span class="muted-sm" id="invMonthlyHead"></span></div>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>Slice</th><th style="text-align:right">Amount range</th><th>Platform</th><th>Why this, not the other</th></tr></thead>
+          <tbody id="invMonthlyTableBody"></tbody>
+        </table>
+      </div>
+      <p style="font-size:13px; color:var(--text-soft); margin-top:14px; line-height:1.6;">
+        <strong>IBKR vs. Revolut, the actual answer:</strong> use both, split by transaction size. IBKR's FX conversion fee is
+        roughly 0.002% — at lump-sum size that crushes Revolut's spread and gets you true share ownership instead of a nominee
+        structure. Revolut holds ISK natively with no wire transfer, so on small monthly amounts a wire fee would eat a bigger
+        share of the contribution than Revolut's spread does. Picking only one would mean overpaying on one end.
+      </p>
+      <div class="chart-box" style="margin-top:16px;"><canvas id="investAllocChart"></canvas></div>
     </div>
 
     <div class="card">
@@ -894,13 +913,71 @@ function renderInvest() {
     investing." That's your starting lump sum.
   `;
 
-  document.getElementById('invPhaseText').innerHTML = `
-    <strong>Lump sum (${fmt(framtid)}):</strong> don't deploy it all on one day — as a beginner, phase it into index ETFs over
-    roughly 12 months (~${fmt(framtid / 12)}/mo) to avoid the regret of buying right before a dip.<br><br>
-    <strong>New monthly surplus:</strong> split it 70% global index ETF (UCITS, via Revolut/IBKR), 15% séreignarsparnaður
-    top-up (only past whatever your employer already matches), 15% speculative (crypto/individual stocks, capped).<br><br>
-    This skews more conservative than a flat 80/10/10 because you're starting from zero debt and an already-overfunded cash
-    buffer — the priority is getting the existing idle cash working, not just the new monthly savings.
+  const monthlyHigh = 50000; // cap stated in section 1's recoverable-spending guidance
+  const split = (total, etfPct, sereignPct, specPct, cryptoOfSpec, stockOfSpec) => ({
+    etf: total * etfPct,
+    sereign: total * sereignPct,
+    crypto: total * specPct * cryptoOfSpec,
+    stocks: total * specPct * stockOfSpec
+  });
+  const lump = split(excessCash, 0.70, 0.15, 0.15, 2 / 3, 1 / 3);
+  const monthlyLow = split(recoverableWaste, 0.70, 0.15, 0.15, 2 / 3, 1 / 3);
+  const monthlyHi = split(monthlyHigh, 0.70, 0.15, 0.15, 2 / 3, 1 / 3);
+
+  document.getElementById('invLumpHead').textContent = fmt(excessCash) + ' total';
+  document.getElementById('invLumpTableBody').innerHTML = `
+    <tr>
+      <td><strong>70% ETF</strong></td>
+      <td class="amt">${fmt(lump.etf)}</td>
+      <td>Interactive Brokers</td>
+      <td>Wire to IBKR in 1–2 transfers (EUR). Their FX fee (~0.002%) is negligible at this size. Auto-invest into <strong>VWCE</strong> (Vanguard FTSE All-World UCITS, accumulating) over 12 months.</td>
+    </tr>
+    <tr>
+      <td><strong>15% séreign</strong></td>
+      <td class="amt">${fmt(lump.sereign)}</td>
+      <td>Payroll, not a wire</td>
+      <td>Most pension funds only accept séreign via payroll deduction. Confirm with Íslandsbanki/your fund first — if no lump option, raise your withholding % for ~6 paychecks until this amount is in.</td>
+    </tr>
+    <tr>
+      <td><strong>10% crypto</strong></td>
+      <td class="amt">${fmt(lump.crypto)}</td>
+      <td>Kraken or Coinbase</td>
+      <td>BTC/ETH only, in 4–6 monthly tranches — crypto is far more volatile than the ETF, so phase it even more carefully.</td>
+    </tr>
+    <tr>
+      <td><strong>5% stocks</strong></td>
+      <td class="amt">${fmt(lump.stocks)}</td>
+      <td>Same IBKR account</td>
+      <td>A handful of individual high-conviction names, phased over 3–4 months. No new platform needed.</td>
+    </tr>
+  `;
+
+  document.getElementById('invMonthlyHead').textContent = fmt(recoverableWaste) + '–' + fmt(monthlyHigh) + '/mo';
+  document.getElementById('invMonthlyTableBody').innerHTML = `
+    <tr>
+      <td><strong>70% ETF</strong></td>
+      <td class="amt">${fmt(monthlyLow.etf)}–${fmt(monthlyHi.etf)}</td>
+      <td>Revolut</td>
+      <td>Native ISK, no wire fee — a monthly IBKR wire would cost proportionally more than Revolut's spread at this size. Recurring order into the same VWCE.</td>
+    </tr>
+    <tr>
+      <td><strong>15% séreign</strong></td>
+      <td class="amt">${fmt(monthlyLow.sereign)}–${fmt(monthlyHi.sereign)}</td>
+      <td>Payroll</td>
+      <td>This is the native mechanism — set your ongoing séreign withholding % to this amount each paycheck.</td>
+    </tr>
+    <tr>
+      <td><strong>10% crypto</strong></td>
+      <td class="amt">${fmt(monthlyLow.crypto)}–${fmt(monthlyHi.crypto)}</td>
+      <td>Kraken or Coinbase</td>
+      <td>Recurring buy, same exchange as the lump-sum crypto slice.</td>
+    </tr>
+    <tr>
+      <td><strong>5% stocks</strong></td>
+      <td class="amt">${fmt(monthlyLow.stocks)}–${fmt(monthlyHi.stocks)}</td>
+      <td>Revolut</td>
+      <td>Too small to justify a wire to IBKR — fractional shares via Revolut instead.</td>
+    </tr>
   `;
 
   drawChart('investAllocChart', {
