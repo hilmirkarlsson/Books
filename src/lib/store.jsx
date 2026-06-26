@@ -60,6 +60,8 @@ export function makeBook(partial) {
     priority: 1,
     genres: [],
     formats: [],
+    format: "physical",
+    spine: null,
     dateAdded: todayISO(),
     dateStarted: null,
     dateFinished: null,
