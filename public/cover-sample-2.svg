@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="300" height="450" viewBox="0 0 300 450">
+  <defs>
+    <linearGradient id="g2" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1c3b2a"/>
+      <stop offset="100%" stop-color="#3f7d4f"/>
+    </linearGradient>
+  </defs>
+  <rect width="300" height="450" fill="url(#g2)"/>
+  <path d="M0 300 Q150 220 300 300 L300 450 L0 450 Z" fill="#234a32"/>
+  <circle cx="150" cy="160" r="55" fill="#e8c352"/>
+  <text x="150" y="70" text-anchor="middle" font-family="Georgia, serif" font-size="34" fill="#f0e6cf" font-weight="700">THE</text>
+  <text x="150" y="110" text-anchor="middle" font-family="Georgia, serif" font-size="34" fill="#f0e6cf" font-weight="700">HOBBIT</text>
+  <text x="150" y="420" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" fill="#f0e6cf">J.R.R. TOLKIEN</text>
+</svg>

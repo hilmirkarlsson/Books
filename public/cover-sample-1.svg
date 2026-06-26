@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="300" height="450" viewBox="0 0 300 450">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b2d4a"/>
+      <stop offset="60%" stop-color="#10618f"/>
+      <stop offset="100%" stop-color="#e8a13c"/>
+    </linearGradient>
+  </defs>
+  <rect width="300" height="450" fill="url(#g)"/>
+  <circle cx="210" cy="150" r="70" fill="#f4d58d" opacity="0.9"/>
+  <circle cx="90" cy="320" r="40" fill="#d8452f" opacity="0.85"/>
+  <text x="150" y="60" text-anchor="middle" font-family="Georgia, serif" font-size="30" fill="#f4ead7" font-weight="700">PROJECT</text>
+  <text x="150" y="95" text-anchor="middle" font-family="Georgia, serif" font-size="30" fill="#f4ead7" font-weight="700">HAIL MARY</text>
+  <text x="150" y="420" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" fill="#f4ead7">ANDY WEIR</text>
+</svg>

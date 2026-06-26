@@ -9,7 +9,7 @@ const TEST_BOOKS = [
     author: "Andy Weir",
     pages: 496,
     format: "physical",
-    coverUrl: "https://covers.openlibrary.org/b/id/10580480-M.jpg",
+    coverUrl: "/cover-sample-1.svg",
   },
   {
     id: "2",
@@ -17,10 +17,18 @@ const TEST_BOOKS = [
     author: "J.R.R. Tolkien",
     pages: 310,
     format: "physical",
-    coverUrl: null,
+    coverUrl: "/cover-sample-2.svg",
   },
   {
     id: "3",
+    title: "Meditations",
+    author: "Marcus Aurelius",
+    pages: 254,
+    format: "physical",
+    coverUrl: null,
+  },
+  {
+    id: "4",
     title: "Atomic Habits",
     author: "James Clear",
     pages: 320,
@@ -28,8 +36,8 @@ const TEST_BOOKS = [
     coverUrl: null,
   },
   {
-    id: "4",
-    title: "Sapiens: A Brief History of Humankind",
+    id: "5",
+    title: "Sapiens",
     author: "Yuval Noah Harari",
     pages: 443,
     format: "audible",
@@ -52,20 +60,51 @@ export default function SpinePreview() {
     <div
       style={{
         minHeight: "100vh",
-        background: "linear-gradient(180deg, #3a2a1d 0%, #2a1d14 100%)",
-        padding: "48px",
+        background: "radial-gradient(120% 90% at 50% 0%, #2a1f15 0%, #1a120c 70%)",
         display: "flex",
-        alignItems: "flex-end",
-        gap: "10px",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "60px",
+        gap: 40,
       }}
     >
-      {TEST_BOOKS.map((b, i) => (
-        <BookSpine
-          key={b.id}
-          book={{ ...b, spine: spines[b.id] }}
-          tilt={i % 2 === 0 ? -1.5 : 2}
+      {/* a single shelf */}
+      <div
+        style={{
+          position: "relative",
+          perspective: "1400px",
+          perspectiveOrigin: "50% -55%",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            alignItems: "flex-end",
+            gap: 4,
+            transformStyle: "preserve-3d",
+            padding: "0 16px",
+          }}
+        >
+          {TEST_BOOKS.map((b, i) => (
+            <BookSpine
+              key={b.id}
+              book={{ ...b, spine: spines[b.id] }}
+              tilt={[0, -1.5, 0, 1.5, 0][i]}
+            />
+          ))}
+        </div>
+        {/* shelf board */}
+        <div
+          style={{
+            height: 22,
+            background: "linear-gradient(180deg,#5a3f28,#3c2817)",
+            borderRadius: "2px 2px 4px 4px",
+            boxShadow: "0 14px 22px rgba(0,0,0,0.55), inset 0 2px 2px rgba(255,255,255,0.12)",
+            transform: "translateY(-2px)",
+          }}
         />
-      ))}
+      </div>
     </div>
   );
 }
